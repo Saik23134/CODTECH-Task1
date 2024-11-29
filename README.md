@@ -50,3 +50,6 @@ Overview of the Project
 6. Print out the processed data and model results.
 
 This workflow provides a complete pipeline for classification with preprocessing, model fitting, and evaluation.
+THE OUTPUT IS:
+![image](https://github.com/user-attachments/assets/5077668e-428b-40f3-98d4-9fc322bf0746)
+
