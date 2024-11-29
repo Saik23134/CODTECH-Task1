@@ -1,7 +1,7 @@
-Name          :Muneppa Sai kiran
-Company       :CODTECH IT SOLUTIONS
-ID            :CT08DS9789
-DOMAIN        :ARTIFICIAL INTELLIGENCE
+Name          :Muneppa Sai kiran                                                               
+Company       :CODTECH IT SOLUTIONS                                                     
+ID            :CT08DS9789                                                             
+DOMAIN        :ARTIFICIAL INTELLIGENCE                                              
 
 Overview of the Project
 
