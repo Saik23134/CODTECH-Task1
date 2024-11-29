@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.utils.class_weight import compute_class_weight
+
+data = {
+    'Age': [25, 30, 35, np.nan, 45, 50, 30],
+    'Salary': [50000, 60000, np.nan, 70000, 80000, 95000, 105000],
+    'Gender': ['Male', 'Female', 'Female', 'Male', 'Female', 'Male', 'Female'],
+    'City': ['NY', 'LA', 'NY', 'LA', 'NY', 'LA', 'NY']
+}
+df = pd.DataFrame(data)
+
+# Step 1: Handle missing values
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Salary'].fillna(df['Salary'].median(), inplace=True)
+df['Gender'].fillna(df['Gender'].mode()[0], inplace=True)
+
+# Step 2: Handle outliers (example for 'Salary' column)
+salary_mean = df['Salary'].mean()
+salary_std = df['Salary'].std()
+df = df[df['Salary'] < salary_mean + 2 * salary_std]
+
+# Step 3: Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# Step 4: Define features and target
+X = df.drop(columns=['Gender'])  # Features (dropping the target column)
+y = df['Gender']  # Target column
+
+# Check class distribution (to handle imbalance)
+print("Class distribution in target variable:")
+print(y.value_counts())
+
+# Step 5: Define preprocessing steps
+# We will scale numerical features and apply one-hot encoding to categorical features
+numerical_features = ['Age', 'Salary']
+categorical_features = ['City']
+
+# ColumnTransformer to apply preprocessing
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_features),  # Standardize numerical features
+        ('cat', OneHotEncoder(), categorical_features)   # One-hot encode categorical features
+    ])
+
+# Step 6: Compute class weights (for handling imbalance in target variable)
+class_weights = compute_class_weight('balanced', classes=np.unique(y), y=y)
+class_weight_dict = dict(zip(np.unique(y), class_weights))
+
+# Step 7: Build a pipeline with preprocessing and model fitting (for demonstration)
+model = Pipeline(steps=[
+    ('preprocessor', preprocessor),  # Apply preprocessing
+    ('classifier', RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42, class_weight=class_weight_dict))  # Random forest classifier with class weights
+])
+
+# Step 8: Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 9: Train the model using the pipeline
+model.fit(X_train, y_train)
+
+# Step 10: Evaluate the model
+print("Model accuracy on test set:", model.score(X_test, y_test))
+
+# Step 11: Check predictions on the test set to understand performance
+y_pred = model.predict(X_test)
+print("Predictions on test set:", y_pred)
+print("True Labels:", y_test.values)
+
+print("\nProcessed Training Data (Features after preprocessing):")
+X_train_processed = preprocessor.fit_transform(X_train)
+print(X_train_processed[:5])
+print("\nProcessed Test Data (Features after preprocessing):")
+X_test_processed = preprocessor.transform(X_test)
+print(X_test_processed[:5])
